@@ -1,0 +1,175 @@
+package FinalExam;
+import java.sql.*;
+import java.util.Scanner;
+
+public class Lecture_Exam {
+
+    private static final String JDBC_URL = "jdbc:mysql://localhost:3306/document_manager";
+    private static final String JDBC_USER = "root";
+    private static final String JDBC_PASSWORD = "";
+    
+    public static void main(String[] args) {
+        try {
+            Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USER, JDBC_PASSWORD);
+            Scanner scanner = new Scanner(System.in);
+            
+            while (true) {
+                System.out.println("Choose operation:");
+                System.out.println("1. Add Personnel");
+                System.out.println("2. Update Personnel");
+                System.out.println("3. Delete Personnel");
+                System.out.println("4. Add Incoming Document"); 
+                System.out.println("5. Add Outgoing Document");
+                System.out.println("6. Exit");
+
+                int choice = scanner.nextInt();
+                scanner.nextLine(); // consume the newline
+
+                switch (choice) {
+                    case 1:
+                        addPersonnel(connection, scanner);
+                        break;
+          
+                    case 2:
+                        updatePersonnel(connection, scanner);
+                        break;
+                    case 3:
+                        deleteRecord(connection, "personnel", "personnelID");
+                        break;
+                    case 4:
+                        addIncomingDocument(connection, scanner);
+                        break;
+   
+                    case 5:
+                        addOutgoingDocument(connection, scanner);
+                        break;
+              
+                    case 6:
+                        System.out.println("Exiting...");
+                        connection.close();
+                        System.exit(0);
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Try again.");
+                        break;
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void addPersonnel(Connection connection, Scanner scanner) throws SQLException {
+        System.out.println("Enter personnel name:");
+        String name = scanner.nextLine();
+
+        System.out.println("Enter personnel age:");
+        int age = scanner.nextInt();
+        scanner.nextLine(); // consume the newline
+
+        System.out.println("Enter personnel department:");
+        String department = scanner.nextLine();
+
+        String insertQuery = "INSERT INTO personnel (Name, Age, Department) VALUES (?, ?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(insertQuery)) {
+            statement.setString(1, name);
+            statement.setInt(2, age);
+            statement.setString(3, department);
+
+            statement.executeUpdate();
+            System.out.println("Personnel added successfully");
+        }
+    }
+
+    private static void addIncomingDocument(Connection connection, Scanner scanner) throws SQLException {
+        System.out.println("Enter document tracking number:");
+        String trackingNumber = scanner.nextLine();
+
+        System.out.println("Enter personnel assigned:");
+        String personnelAssigned = scanner.nextLine();
+
+        System.out.println("Enter date received (YYYY-MM-DD):");
+        String date_recieved = scanner.nextLine();
+
+        String insertQuery = "INSERT INTO incoming_document (doctrack_number, personnel_assigned, date_recieved) VALUES (?, ?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(insertQuery)) {
+            statement.setString(1, trackingNumber);
+            statement.setString(2, personnelAssigned);
+            statement.setString(3, date_recieved);
+
+            statement.executeUpdate();
+            System.out.println("Incoming document added successfully");
+        }
+    }
+
+    private static void addOutgoingDocument(Connection connection, Scanner scanner) throws SQLException {
+        System.out.println("Enter document tracking number:");
+        String trackingNumber = scanner.nextLine();
+
+        System.out.println("Enter originating office:");
+        String originatingOffice = scanner.nextLine();
+
+        System.out.println("Enter target recipient:");
+        String targetRecipient = scanner.nextLine();
+
+        System.out.println("Enter date received (YYYY-MM-DD):");
+        String date_recieved = scanner.nextLine();
+
+        System.out.println("Enter document accomplished status:");
+        String docAccomplished = scanner.nextLine();
+
+        String insertQuery = "INSERT INTO outgoing_document (doctrack_number, originating_office, target_recipient, date_recieved, doc_accomplised) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(insertQuery)) {
+            statement.setString(1, trackingNumber);
+            statement.setString(2, originatingOffice);
+            statement.setString(3, targetRecipient);
+            statement.setString(4, date_recieved);
+            statement.setString(5, docAccomplished);
+
+            statement.executeUpdate();
+            System.out.println("Outgoing document added successfully");
+        }
+    }
+
+
+    private static void updatePersonnel(Connection connection, Scanner scanner) throws SQLException {
+        System.out.println("Enter personnel ID to update:");
+        int personnelID = scanner.nextInt();
+        scanner.nextLine(); // consume the newline
+
+        System.out.println("Enter new personnel name:");
+        String newName = scanner.nextLine();
+
+        System.out.println("Enter new personnel age:");
+        int newAge = scanner.nextInt();
+        scanner.nextLine(); // consume the newline
+
+        System.out.println("Enter new personnel department:");
+        String newDepartment = scanner.nextLine();
+
+        String updateQuery = "UPDATE personnel SET Name=?, Age=?, Department=? WHERE personnelID=?";
+        try (PreparedStatement statement = connection.prepareStatement(updateQuery)) {
+            statement.setString(1, newName);
+            statement.setInt(2, newAge);
+            statement.setString(3, newDepartment);
+            statement.setInt(4, personnelID);
+
+            statement.executeUpdate();
+            System.out.println("Personnel updated successfully");
+        }
+    }
+
+    private static void deleteRecord(Connection connection, String tableName, String columnName) throws SQLException {
+        System.out.println("Enter " + columnName + " to delete:");
+        int id = new Scanner(System.in).nextInt();
+
+        String deleteQuery = "DELETE FROM " + tableName + " WHERE " + columnName + "=?";
+        try (PreparedStatement statement = connection.prepareStatement(deleteQuery)) {
+            statement.setInt(1, id);
+
+            statement.executeUpdate();
+            System.out.println("Record deleted successfully");
+        }
+    }
+}
